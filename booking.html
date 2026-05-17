@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+// Prevent flash — apply dark mode before page renders
+if (localStorage.getItem('ccse_theme') === 'dark') {
+    document.documentElement.classList.add('dark-mode-preload');
+}
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Appointment — CCSE</title>
+<style>
+
+/* ===============================
+   🎨 THEME — edit colors here
+================================= */
+:root {
+    --primary: #800000;
+    --secondary: #a52a2a;
+    --bg: #f5f5f5;
+    --text: #333;
+    --white: #fff;
+    --border: #ddd;
+    --input-focus: #f9e8e8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: var(--bg); color: var(--text); }
+
+/* NAVBAR */
+.navbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 40px; background: var(--white);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.logo { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+.nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: var(--text); }
+.nav-links a:hover { color: var(--primary); font-weight: bold; }
+.btn-primary {
+    background: var(--primary); color: white;
+    padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer;
+}
+    
+    .logo a {
+        text-decoration: none;
+        color: inherit;
+    }
+    
+
+/* PAGE HEADER */
+.page-header {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white; padding: 40px 40px 60px; text-align: center;
+}
+.page-header h1 { font-size: 1.9rem; margin-bottom: 6px; }
+.page-header p { opacity: 0.88; font-size: 0.97rem; }
+
+/* ===============================
+   STEP INDICATOR
+================================= */
+.steps-wrapper {
+    max-width: 700px;
+    margin: -32px auto 0;
+    padding: 0 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    position: relative;
+}
+
+/* connecting line between steps */
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 60px; right: 60px;
+    height: 2px;
+    background: var(--border);
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.9rem;
+    color: #aaa;
+    transition: all 0.3s;
+}
+
+.step-label {
+    font-size: 0.72rem;
+    color: #aaa;
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+
+/* active step */
+.step.active .step-circle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(128,0,0,0.15);
+}
+.step.active .step-label { color: var(--primary); font-weight: bold; }
+
+/* done step */
+.step.done .step-circle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.step.done .step-label { color: var(--primary); }
+
+/* ===============================
+   FORM CARD
+================================= */
+.form-wrapper {
+    max-width: 700px;
+    margin: 28px auto 60px;
+    padding: 0 24px;
+}
+
+.form-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 36px 40px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+}
+
+.form-card h2 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 6px;
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+}
+
+.form-card .form-subtitle {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 28px;
+    padding-left: 16px;
+}
+
+/* FORM FIELDS */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: bold;
+    margin-bottom: 7px;
+    color: var(--text);
+}
+
+/* ✏️ Required star color */
+.required { color: var(--primary); margin-left: 2px; }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.93rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    background: var(--input-focus);
+}
+
+.form-group textarea { resize: vertical; min-height: 90px; }
+
+/* two columns side by side */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* SERVICE CHECKBOXES */
+/* ✏️ Edit service options in HTML below */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.88rem;
+}
+
+.checkbox-option input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.checkbox-option:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--input-focus);
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* FORM NAV BUTTONS */
+.form-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    gap: 12px;
+}
+
+.btn-back {
+    padding: 11px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-back:hover { background: var(--primary); color: white; }
+
+.btn-next {
+    padding: 11px 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(128,0,0,0.3);
+    transition: all 0.2s;
+}
+.btn-next:hover {
+    background: var(--secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(128,0,0,0.35);
+}
+
+/* HIDDEN STEPS */
+.form-step { display: none; }
+.form-step.active { display: block; }
+
+/* ===============================
+   REVIEW STEP (Step 3)
+================================= */
+.review-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+.review-table tr td {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.review-table tr td:first-child {
+    font-weight: bold;
+    color: #666;
+    width: 40%;
+}
+.review-table tr:last-child td { border-bottom: none; }
+
+/* ===============================
+   SUCCESS SCREEN
+================================= */
+.success-screen {
+    display: none;
+    text-align: center;
+    padding: 50px 20px;
+}
+.success-screen .checkmark {
+    font-size: 4rem;
+    margin-bottom: 16px;
+}
+.success-screen h2 { color: var(--primary); margin-bottom: 8px; }
+.success-screen p { color: #666; font-size: 0.95rem; margin-bottom: 24px; }
+.success-screen .ref {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 14px 24px;
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 1.1rem;
+    display: inline-block;
+    margin-bottom: 28px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .navbar { padding: 12px 16px; }
+    .form-card { padding: 24px 18px; }
+    .form-row { grid-template-columns: 1fr; }
+    .checkbox-group { grid-template-columns: 1fr; }
+    .steps::before { left: 30px; right: 30px; }
+    .step-label { font-size: 0.65rem; }
+}
+
+
+/* ── NAV ICONS — hollow SVG style ── */
+.nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.nav-links a:hover, .nav-links a.active {
+    background: #f9e8e8;
+    color: var(--primary) !important;
+    font-weight: bold;
+    transform: translateY(-1px);
+}
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+.nav-links a:hover .nav-icon,
+.nav-links a.active .nav-icon {
+    transform: scale(1.2);
+}
+/* ── Logout button: raised red in dark mode ── */
+.btn-logout {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+/* ── Nav-right tight spacing ── */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ── GLOBAL DARK MODE — Black + Red high-contrast theme ── */
+body.dark-mode {
+    background: #0a0a0a !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .navbar {
+    background: #111111 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6) !important;
+    border-bottom: 1px solid #cc0000 !important;
+}
+body.dark-mode .nav-links a { color: #f0f0f0 !important; }
+body.dark-mode .logo { color: #ff3333 !important; }
+body.dark-mode .user-badge {
+    background: rgba(204,0,0,0.2) !important;
+    border-color: #cc0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .user-badge:hover {
+    background: rgba(204,0,0,0.35) !important;
+}
+body.dark-mode .btn-primary {
+    background: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-primary:hover { background: #aa0000 !important; }
+body.dark-mode .btn-logout {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-logout:hover { background: #aa0000 !important; border-color: #aa0000 !important; }
+body.dark-mode .nav-links a:hover,
+body.dark-mode .nav-links a.active {
+    background: rgba(204,0,0,0.2) !important;
+    color: #ff4444 !important;
+}
+
+body.dark-mode .page-header {
+    background: linear-gradient(to right, #330000, #660000) !important;
+}
+body.dark-mode .steps {
+    background: #1a1a1a !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    border: 1px solid #2a2a2a !important;
+}
+body.dark-mode .steps::before { background: #333 !important; }
+body.dark-mode .step-circle {
+    background: #1a1a1a !important;
+    border-color: #444 !important;
+    color: #888 !important;
+}
+body.dark-mode .step.active .step-circle,
+body.dark-mode .step.done .step-circle {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #fff !important;
+}
+body.dark-mode .step.active .step-label { color: #ff4444 !important; }
+body.dark-mode .step.done .step-label { color: #ff6666 !important; }
+body.dark-mode .form-card {
+    background: #1a1a1a !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+    border: 1px solid #2a2a2a !important;
+}
+body.dark-mode .form-card h2 { color: #ff4444 !important; border-left-color: #cc0000 !important; }
+body.dark-mode .form-card .form-subtitle { color: #888 !important; }
+body.dark-mode .form-group label { color: #f0f0f0 !important; }
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+    background: #111 !important;
+    color: #f0f0f0 !important;
+    border-color: #444 !important;
+}
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus,
+body.dark-mode .form-group textarea:focus {
+    border-color: #cc0000 !important;
+    background: #1a0000 !important;
+}
+body.dark-mode .checkbox-option {
+    background: #111 !important;
+    border-color: #444 !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .checkbox-option:has(input:checked) {
+    border-color: #cc0000 !important;
+    background: #1a0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .btn-back {
+    border-color: #cc0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .btn-back:hover {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+body.dark-mode .btn-next {
+    background: #cc0000 !important;
+    box-shadow: 0 4px 14px rgba(204,0,0,0.4) !important;
+}
+body.dark-mode .btn-next:hover { background: #aa0000 !important; }
+body.dark-mode .review-table tr td { border-bottom-color: #2a2a2a !important; }
+body.dark-mode .review-table tr td:first-child { color: #888 !important; }
+body.dark-mode .success-screen h2 { color: #ff4444 !important; }
+body.dark-mode .success-screen .ref {
+    background: #1a0000 !important;
+    color: #ff4444 !important;
+}
+
+
+/* ── LOGO IMAGE ── */
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    margin-right: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+/* ── PROFILE ICON BUTTON ── */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #f9e8e8;
+    border: 2px solid #e8c8c8;
+    font-size: 1.35rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    overflow: hidden;
+    padding: 0;
+}
+.user-badge:hover { background: #f0d0d0; transform: scale(1.08); }
+
+
+/* ── TIME SLOT CARDS ── */
+.slot-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #333;
+    width: 100%;
+}
+.slot-btn:hover:not(.occupied) { border-color: var(--primary); background: #fdf0f0; }
+.slot-btn.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+.slot-btn.selected .slot-status { color: rgba(255,255,255,0.85); }
+.slot-btn.occupied { background: #fafafa; border-color: #e0e0e0; cursor: not-allowed; opacity: 0.7; }
+.slot-status {
+    font-size: 0.75rem;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.slot-status.vacant  { color: #2e7d32; }
+.slot-status.partial { color: #b45309; }
+.slot-status.busy    { color: #c62828; }
+
+body.dark-mode .slot-btn {
+    background: #1a1a1a !important;
+    border-color: #333 !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .slot-btn:hover:not(.occupied) { border-color: #cc0000 !important; background: #2a0000 !important; }
+body.dark-mode .slot-btn.selected { border-color: #cc0000 !important; background: #cc0000 !important; color: #fff !important; }
+body.dark-mode .slot-btn.occupied { background: #111 !important; border-color: #222 !important; }
+
+
+/* ── Pre-filled / locked fields from session ── */
+.field-locked {
+    background: #f3f3f3 !important;
+    color: #555 !important;
+    cursor: not-allowed !important;
+    border-color: #ddd !important;
+}
+.field-locked:focus {
+    border-color: #ddd !important;
+    background: #f3f3f3 !important;
+    outline: none !important;
+}
+body.dark-mode .field-locked {
+    background: #1e1e1e !important;
+    color: #aaa !important;
+    border-color: #333 !important;
+}
+.prefilled-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    font-weight: normal;
+    vertical-align: middle;
+}
+body.dark-mode .prefilled-badge {
+    background: rgba(0,100,0,0.25);
+    color: #66bb6a;
+}
+.step-skip-notice {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: #2e7d32;
+    margin-bottom: 18px;
+    display: none;
+}
+body.dark-mode .step-skip-notice {
+    background: rgba(0,100,0,0.15);
+    border-color: rgba(0,150,0,0.3);
+    color: #66bb6a;
+}
+
+body.dark-mode select[disabled] {
+    background: #1e1e1e !important;
+    color: #aaa !important;
+    border-color: #333 !important;
+}
+</style>
+</head>
+<body>
+
+<header class="navbar">  
+    <!-- ✏️ LOGO IMAGE: Replace "ccse_logo.jpg" with your logo file name -->
+    <div class="logo"><a href="index.html"><img class="logo-img" src="ccse_logo.jpg" alt="CCSE"> CCSE Booking</a></div>
+        <ul class="nav-links">
+        <li><a href="facilities.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="9" x2="21" y2="9"/><line x1="15" y1="15" x2="21" y2="15"/></svg>Facilities</a></li>
+        <li><a href="mybookings.html" class="active"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="16" y2="18"/></svg>My Bookings</a></li>
+        <li><a href="help.html"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>Help</a></li>
+    </ul>
+    <button class="btn-primary" onclick="location.href='booking.html'">Start Booking</button>
+    <button onclick="localStorage.removeItem('ccse_session');location.href='login.html'" style="background:transparent;color:var(--primary);border:2px solid var(--primary);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.85rem;margin-left:4px;">Log Out</button>
+</header>
+
+<!-- ✏️ Edit page title/subtitle -->
+<div class="page-header">
+    <h1>Book an Appointment</h1>
+    <p>Fill out the form below to reserve your slot.</p>
+</div>
+
+<!-- STEP INDICATOR -->
+<div class="steps-wrapper">
+    <div class="steps">
+        <!-- ✏️ Edit step labels if needed -->
+        <div class="step active" id="step-dot-1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Your Info</div>
+        </div>
+        <div class="step" id="step-dot-2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Facility & Service</div>
+        </div>
+        <div class="step" id="step-dot-3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Schedule</div>
+        </div>
+        <div class="step" id="step-dot-4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Review</div>
+        </div>
+    </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrapper">
+    <div class="form-card" id="form-card">
+
+        <!-- ================================================
+             STEP 1 — PERSONAL INFO
+             ✏️ Edit field labels and placeholder text
+        ================================================= -->
+        <div class="form-step active" id="step-1">
+            <h2>Personal Information</h2>
+            <p class="form-subtitle">Tell us who you are.</p>
+
+            <div class="step-skip-notice" id="step-skip-notice">
+                ✅ Your info has been filled in automatically. Taking you to the schedule step…
+            </div>
+
+            <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <!-- ✏️ Edit placeholder -->
+                <input type="text" id="f-name" placeholder="e.g. Juan Dela Cruz">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Student ID <span class="required">*</span></label>
+                    <input type="text" id="f-id" placeholder="e.g. 2021-00123">
+                </div>
+                <div class="form-group">
+                    <label>Year & Section <span class="required">*</span></label>
+                    <input type="text" id="f-yearsec" placeholder="e.g. 2nd Year - A">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address <span class="required">*</span></label>
+                <input type="email" id="f-email" placeholder="e.g. juan@school.edu">
+            </div>
+
+            <div class="form-group">
+                <label>Contact Number</label>
+                <input type="text" id="f-contact" placeholder="e.g. 09XX-XXX-XXXX">
+            </div>
+
+            <div class="form-nav">
+                <span></span>
+                <button class="btn-next" onclick="goStep(2)">Next →</button>
+            </div>
+        </div>
+
+        <!-- ================================================
+             STEP 2 — FACILITY & SERVICE
+             ✏️ Edit facility options and service checkboxes
+        ================================================= -->
+        <div class="form-step" id="step-2">
+            <h2>Facility & Service</h2>
+            <p class="form-subtitle">Choose where you're going and what you need.</p>
+
+            <div class="form-group">
+                <label>Facility <span class="required">*</span></label>
+                <!-- ✏️ Edit facility options -->
+                <select id="f-facility" onchange="updateServices(); refreshSlots()">
+                    <option value="">Select a Facility</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="library">Library</option>
+                    <option value="lab">Computer Lab</option>
+                    <!-- ✏️ Add more facilities here -->
+                </select>
+            </div>
+
+            <div class="form-group" id="services-group" style="display:none">
+                <label>Services Needed <span class="required">*</span></label>
+                <!-- ✏️ Service options are injected by JS below based on facility -->
+                <div class="checkbox-group" id="services-container"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Notes</label>
+                <textarea id="f-notes" placeholder="Any special requests or info we should know..."></textarea>
+            </div>
+
+            <div class="form-nav">
+                <button class="btn-back" onclick="goStep(1)">← Back</button>
+                <button class="btn-next" onclick="goStep(3)">Next →</button>
+            </div>
+        </div>
+
+        <!-- ================================================
+             STEP 3 — SCHEDULE
+             ✏️ Edit available time slots and date restrictions
+        ================================================= -->
+        <div class="form-step" id="step-3">
+            <h2>Pick a Schedule</h2>
+            <p class="form-subtitle">Choose your preferred date and time slot.</p>
+
+            <!-- Summary strip — shown when pre-filled from facilities page -->
+            <div id="booking-summary-strip" style="display:none;background:#f9e8e8;border:1px solid #e8c8c8;border-radius:8px;padding:10px 14px;font-size:0.84rem;color:#800000;margin-bottom:18px;line-height:1.7;">
+            </div>
+
+            <div class="form-group">
+                <label>Preferred Date <span class="required">*</span></label>
+                <input type="date" id="f-date" onchange="refreshSlots()">
+            </div>
+
+            <div id="dup-booking-warning" style="display:none;background:#fff3cd;border:1.5px solid #ffc107;border-radius:8px;padding:10px 14px;font-size:0.87rem;color:#856404;margin-bottom:14px;">
+                ⚠️ <strong>Duplicate booking:</strong> You already have an appointment at this facility on the selected date. Only <strong>1 booking per facility per day</strong> is allowed. Please choose a different date or facility.
+            </div>
+            <div class="form-group">
+                <label>Preferred Time Slot <span class="required">*</span></label>
+                <!-- Slots are rendered dynamically with vacancy status -->
+                <div id="slot-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap:10px; margin-top:8px;"></div>
+                <input type="hidden" id="f-time">
+            </div>
+
+            <div class="form-nav">
+                <button class="btn-back" onclick="goStep(2)">← Back</button>
+                <button class="btn-next" onclick="goStep(4)">Review →</button>
+            </div>
+        </div>
+
+        <!-- ================================================
+             STEP 4 — REVIEW & CONFIRM
+             (auto-filled from previous steps — no edits needed here)
+        ================================================= -->
+        <div class="form-step" id="step-4">
+            <h2>Review Your Appointment</h2>
+            <p class="form-subtitle">Double-check everything before confirming.</p>
+
+            <table class="review-table" id="review-table"></table>
+
+            <div class="form-nav">
+                <button class="btn-back" onclick="goStep(3)">← Back</button>
+                <button class="btn-next" onclick="submitBooking()">✅ Confirm Booking</button>
+            </div>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div class="success-screen" id="success-screen">
+            <div class="checkmark">🎉</div>
+            <h2>Booking Confirmed!</h2>
+            <p>Your appointment has been submitted. See you there!</p>
+            <!-- Reference number is auto-generated -->
+            <div class="ref" id="ref-number"></div>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button class="btn-next" onclick="location.href='mybookings.html'">View My Bookings</button>
+                <button class="btn-back" onclick="location.href='index.html'">Back to Home</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ── TIME SLOTS WITH VACANCY ──
+// ✏️ Edit this array to add/remove time slots
+const TIME_SLOTS = [
+    '8:00 AM – 9:00 AM',
+    '9:00 AM – 10:00 AM',
+    '10:00 AM – 11:00 AM',
+    '11:00 AM – 12:00 PM',
+    '1:00 PM – 2:00 PM',
+    '2:00 PM – 3:00 PM',
+    '3:00 PM – 4:00 PM',
+    '4:00 PM – 5:00 PM',
+];
+
+function getSlotHour(slotLabel) {
+    const m = slotLabel.match(/^(\d+):?(\d*)\s*(AM|PM)/i);
+    if (!m) return -1;
+    let h = parseInt(m[1]);
+    const ap = m[3].toUpperCase();
+    if (ap === 'PM' && h !== 12) h += 12;
+    if (ap === 'AM' && h === 12) h = 0;
+    return h;
+}
+
+const MAX_BOOKINGS_PER_SLOT = 3; // Max appointments allowed per hour per facility
+
+function normalizeFacility(f) {
+    return (f || '').toLowerCase().trim()
+        .replace('computer lab', 'lab')
+        .replace('comp lab', 'lab');
+}
+
+function countSlotBookings(facility, date, slotLabel) {
+    if (!facility || !date) return 0;
+    const bookings = JSON.parse(localStorage.getItem('ccse_bookings') || '[]');
+    const slotH = getSlotHour(slotLabel);
+    const facNorm = normalizeFacility(facility);
+    return bookings.filter(b => {
+        if (b.status === 'cancelled') return false;
+        if (b.date !== date) return false;
+        if (!b.facility) return false;
+        if (normalizeFacility(b.facility) !== facNorm) return false;
+        if (!b.time) return false;
+        return getSlotHour(b.time) === slotH;
+    }).length;
+}
+
+function isSlotOccupied(facility, date, slotLabel) {
+    return countSlotBookings(facility, date, slotLabel) >= MAX_BOOKINGS_PER_SLOT;
+}
+
+// Check if current user already has a booking for this facility on this date
+function userAlreadyBookedFacilityOnDate(facility, date) {
+    const session = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+    if (!session) return false;
+    const bookings = JSON.parse(localStorage.getItem('ccse_bookings') || '[]');
+    const facNorm = normalizeFacility(facility);
+    const userId = session.studentId || session.email || session.name;
+    return bookings.some(b => {
+        if (b.status === 'cancelled') return false;
+        if (b.date !== date) return false;
+        if (normalizeFacility(b.facility) !== facNorm) return false;
+        const bUserId = b.studentId || b.email || b.name;
+        return bUserId === userId;
+    });
+}
+
+function refreshSlots() {
+    const grid = document.getElementById('slot-grid');
+    if (!grid) return;
+
+    // Only re-render if step 3 is currently visible
+    const step3 = document.getElementById('step-3');
+    if (step3 && !step3.classList.contains('active')) return;
+
+    const facilityEl = document.getElementById('f-facility');
+    const facilityText = facilityEl
+        ? (facilityEl.options[facilityEl.selectedIndex]?.text || '')
+        : '';
+    const date = document.getElementById('f-date').value;
+
+    // Clear prior time selection
+    document.getElementById('f-time').value = '';
+
+    // If no facility or date yet, show placeholder message
+    if (!facilityText || facilityText === 'Select a Facility' || !date) {
+        grid.innerHTML = `<p style="color:#aaa; font-size:0.88rem; grid-column:1/-1;">
+            Select a facility and date above to see slot availability.</p>`;
+        return;
+    }
+
+    // Warn if user already has a booking for this facility on this date
+    const dupWarning = document.getElementById('dup-booking-warning');
+    const facilityValue = facilityEl ? facilityEl.value : '';
+    if (dupWarning) {
+        if (date && facilityValue && userAlreadyBookedFacilityOnDate(facilityText, date)) {
+            dupWarning.style.display = 'block';
+        } else {
+            dupWarning.style.display = 'none';
+        }
+    }
+
+    grid.innerHTML = TIME_SLOTS.map(slot => {
+        const count = countSlotBookings(facilityText, date, slot);
+        const occupied = count >= MAX_BOOKINGS_PER_SLOT;
+        const spotsLeft = MAX_BOOKINGS_PER_SLOT - count;
+        const statusText = occupied
+            ? '🔴 Fully Booked'
+            : spotsLeft === MAX_BOOKINGS_PER_SLOT
+                ? '🟢 Vacant'
+                : `🟡 ${spotsLeft} spot${spotsLeft > 1 ? 's' : ''} left`;
+        const statusClass = occupied ? 'busy' : (spotsLeft < MAX_BOOKINGS_PER_SLOT ? 'partial' : 'vacant');
+        return `
+        <button type="button"
+            class="slot-btn${occupied ? ' occupied' : ''}"
+            onclick="${occupied ? '' : `selectSlot(this, '${slot}')`}"
+            ${occupied ? 'disabled' : ''}>
+            <span>${slot}</span>
+            <span class="slot-status ${statusClass}">
+                ${statusText}
+            </span>
+        </button>`;
+    }).join('');
+}
+
+function selectSlot(btn, slot) {
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('f-time').value = slot;
+}
+
+
+const serviceMap = {
+    clinic: [
+        'General Checkup',
+        'Medical Certificate',
+        'First Aid',
+        'Dental Consultation',
+        'Mental Health Consultation',
+        'Other'
+    ],
+    library: [
+        'Book Borrowing',
+        'Research Assistance',
+        'Study Room Reservation',
+        'Printing / Scanning',
+        'Thesis / Capstone Support',
+        'Other'
+    ],
+    lab: [
+        'General Computer Use',
+        'Software Access',
+        'Project / Coding Work',
+        'Printing',
+        'Lab Class Make-up',
+        'Other'
+    ]
+    // ✏️ Add more facilities and their services here:
+    // myfacility: ['Service 1', 'Service 2', 'Service 3']
+};
+
+function updateServices() {
+    const facility = document.getElementById('f-facility').value;
+    const container = document.getElementById('services-container');
+    const group = document.getElementById('services-group');
+    container.innerHTML = '';
+
+    if (!facility || !serviceMap[facility]) {
+        group.style.display = 'none';
+        return;
+    }
+
+    group.style.display = 'block';
+    serviceMap[facility].forEach(service => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-option';
+        label.innerHTML = `<input type="checkbox" value="${service}"> ${service}`;
+        container.appendChild(label);
+    });
+}
+
+// STEP NAVIGATION
+function goStep(n) {
+    // basic validation
+    if (n === 2 && !validate1()) return;
+    if (n === 3 && !validate2()) return;
+    if (n === 4 && !validate3()) return;
+
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`step-${i}`).classList.remove('active');
+        const dot = document.getElementById(`step-dot-${i}`);
+        dot.classList.remove('active', 'done');
+        if (i < n) dot.classList.add('done');
+    }
+    document.getElementById(`step-${n}`).classList.add('active');
+    document.getElementById(`step-dot-${n}`).classList.add('active');
+
+    if (n === 3) refreshSlots();
+    if (n === 4) buildReview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// VALIDATION
+function validate1() {
+    const name = document.getElementById('f-name').value.trim();
+    const id   = document.getElementById('f-id').value.trim();
+    const ys   = document.getElementById('f-yearsec').value;
+    const em   = document.getElementById('f-email').value.trim();
+    if (!name || !id || !ys || !em) {
+        alert('Please fill in all required fields.'); return false;
+    }
+    return true;
+}
+
+function validate2() {
+    const fac = document.getElementById('f-facility').value;
+    if (!fac) { alert('Please select a facility.'); return false; }
+    const checked = document.querySelectorAll('#services-container input:checked');
+    if (checked.length === 0) { alert('Please select at least one service.'); return false; }
+    return true;
+}
+
+function validate3() {
+    const date = document.getElementById('f-date').value;
+    const time = document.getElementById('f-time').value;
+    if (!date) { alert('Please select a date.'); return false; }
+    if (!time) { alert('Please select a time slot.'); return false; }
+    return true;
+}
+
+// BUILD REVIEW TABLE
+function buildReview() {
+    const services = [...document.querySelectorAll('#services-container input:checked')]
+        .map(c => c.value).join(', ');
+
+    const facilityText = document.getElementById('f-facility');
+
+    const rows = [
+        ['Full Name',      document.getElementById('f-name').value],
+        ['Student ID',     document.getElementById('f-id').value],
+        ['Year & Section', document.getElementById('f-yearsec').value],
+        ['Email',          document.getElementById('f-email').value],
+        ['Contact',        document.getElementById('f-contact').value || '—'],
+        ['Facility',       facilityText.options[facilityText.selectedIndex].text],
+        ['Services',       services],
+        ['Notes',          document.getElementById('f-notes').value || '—'],
+        ['Date',           document.getElementById('f-date').value],
+        ['Time Slot',      document.getElementById('f-time').value],
+    ];
+
+    const table = document.getElementById('review-table');
+    table.innerHTML = rows.map(([k, v]) =>
+        `<tr><td>${k}</td><td>${v}</td></tr>`
+    ).join('');
+}
+
+// Set min date to today (safe guard)
+const fDateEl = document.getElementById('f-date');
+if (fDateEl) fDateEl.min = new Date().toISOString().split('T')[0];
+
+// =============================================
+// AUTH GUARD + SESSION AUTOFILL + FACILITY PREFILL
+// =============================================
+(function() {
+    const session = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+    if (!session) { location.href = 'login.html'; return; }
+
+    // ── Fill personal info fields ──
+    const fields = [
+        ['f-name',    session.name],
+        ['f-id',      session.studentId],
+        ['f-email',   session.email],
+        ['f-yearsec', session.yearSec],
+        ['f-contact', session.contact],
+    ];
+    fields.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val) {
+            el.value = val;
+            el.setAttribute('readonly', true);
+            el.classList.add('field-locked');
+        }
+    });
+
+    // Show prefilled badge on Step 1 heading
+    const step1Title = document.querySelector('#step-1 h2');
+    if (step1Title && session.name) {
+        const badge = document.createElement('span');
+        badge.className = 'prefilled-badge';
+        badge.textContent = '✓ Auto-filled';
+        step1Title.appendChild(badge);
+    }
+
+    // ── Read facility from URL param ──
+    const params = new URLSearchParams(window.location.search);
+    const facilityParam = params.get('facility');
+
+    if (facilityParam) {
+        // Pre-select the facility dropdown
+        const sel = document.getElementById('f-facility');
+        if (sel) {
+            for (let i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].value === facilityParam) {
+                    sel.selectedIndex = i;
+                    // Lock it
+                    sel.setAttribute('disabled', true);
+                    sel.style.cssText = 'background:#f3f3f3;color:#555;cursor:not-allowed;border-color:#ddd;';
+                    break;
+                }
+            }
+        }
+
+        // Show skip notice on Step 1
+        const notice = document.getElementById('step-skip-notice');
+        if (notice) notice.style.display = 'block';
+
+        // Auto-jump to Step 3 (Schedule) after a brief moment
+        setTimeout(function() {
+            if (typeof updateServices === 'function') updateServices();
+            if (typeof refreshSlots === 'function') refreshSlots();
+            if (typeof goStep === 'function') goStep(3);
+        }, 80);
+    }
+})();
+
+// Save booking to localStorage
+function submitBooking() {
+    const session = JSON.parse(localStorage.getItem('ccse_session') || '{}');
+    const services = [...document.querySelectorAll('#services-container input:checked')].map(c => c.value);
+    const facilityEl = document.getElementById('f-facility');
+    const chosenDate = document.getElementById('f-date').value;
+    const chosenTime = document.getElementById('f-time').value;
+    const facilityText = facilityEl.options[facilityEl.selectedIndex].text;
+
+    // ── DUPLICATE CHECK: 1 booking per user per facility per day ──
+    if (userAlreadyBookedFacilityOnDate(facilityText, chosenDate)) {
+        alert('⚠️ You already have a booking for ' + facilityText + ' on this date. Only 1 booking per facility per day is allowed.');
+        return;
+    }
+
+    // ── SLOT FULL CHECK: max 3 per slot ──
+    if (countSlotBookings(facilityText, chosenDate, chosenTime) >= MAX_BOOKINGS_PER_SLOT) {
+        alert('⚠️ This time slot is now fully booked. Please go back and select another slot.');
+        return;
+    }
+
+    const ref = 'CCSE-' + Date.now().toString().slice(-6);
+
+    const booking = {
+        ref,
+        name: document.getElementById('f-name').value,
+        studentId: document.getElementById('f-id').value,
+        yearSec: document.getElementById('f-yearsec').value,
+        email: document.getElementById('f-email').value,
+        contact: document.getElementById('f-contact').value,
+        facility: facilityEl.options[facilityEl.selectedIndex].text,
+        services,
+        notes: document.getElementById('f-notes').value,
+        date: chosenDate,
+        time: chosenTime,
+        status: 'confirmed',
+        emoji: facilityEl.value === 'clinic' ? '🏥' : facilityEl.value === 'library' ? '📚' : '💻',
+        createdAt: new Date().toISOString()
+    };
+
+    const bookings = JSON.parse(localStorage.getItem('ccse_bookings') || '[]');
+    bookings.push(booking);
+    localStorage.setItem('ccse_bookings', JSON.stringify(bookings));
+
+    document.getElementById('ref-number').textContent = 'Reference #: ' + ref;
+    document.getElementById('step-4').classList.remove('active');
+    document.getElementById('success-screen').style.display = 'block';
+
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`step-dot-${i}`).classList.remove('active');
+        document.getElementById(`step-dot-${i}`).classList.add('done');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+
+<script>
+// ── Apply saved dark mode theme on every page load ──
+(function() {
+    if (localStorage.getItem('ccse_theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+})();
+
+// ── Populate summary strip on Step 3 if pre-filled ──
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const facilityParam = params.get('facility');
+    if (!facilityParam) return;
+
+    const session = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+    if (!session) return;
+
+    const facilityLabel = { clinic: 'Clinic', library: 'Library', lab: 'Computer Lab' }[facilityParam] || facilityParam;
+
+    const strip = document.getElementById('booking-summary-strip');
+    if (strip) {
+        strip.style.display = 'block';
+        strip.innerHTML =
+            '<strong>📋 Booking for:</strong> ' + (session.name || '—') +
+            ' &nbsp;|&nbsp; <strong>ID:</strong> ' + (session.studentId || '—') +
+            ' &nbsp;|&nbsp; <strong>Section:</strong> ' + (session.yearSec || '—') +
+            '<br><strong>📧</strong> ' + (session.email || '—') +
+            (session.contact ? ' &nbsp;|&nbsp; <strong>📞</strong> ' + session.contact : '') +
+            ' &nbsp;|&nbsp; <strong>🏢 Facility:</strong> ' + facilityLabel;
+    }
+})();
+</script>
+
+</body>
+</html>                                                             

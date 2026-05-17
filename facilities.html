@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+// Prevent flash — apply dark mode before page renders
+if (localStorage.getItem('ccse_theme') === 'dark') {
+    document.documentElement.classList.add('dark-mode-preload');
+}
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facilities — CCSE</title>
+<style>
+
+/* ===============================
+   🎨 THEME — edit colors here
+================================= */
+:root {
+    --primary: #800000;
+    --secondary: #a52a2a;
+    --bg: #f5f5f5;
+    --text: #333;
+    --white: #fff;
+    --card-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: var(--bg); color: var(--text); }
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.logo { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+.nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: var(--text); transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--primary); font-weight: bold; }
+.btn-primary {
+    background: var(--primary); color: white;
+    padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer;
+    transition: background 0.2s;
+}
+    
+    .logo a {
+        text-decoration: none;
+        color: inherit;
+    }
+    
+.btn-primary:hover { background: var(--secondary); }
+
+/* PAGE HEADER — background changes on facility card hover */
+.page-header {
+    position: relative;
+    overflow: hidden;
+    color: white;
+    padding: 50px 40px;
+    text-align: center;
+    transition: background 0.5s ease;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Default gradient layer */
+.page-header-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    transition: opacity 0.5s ease;
+    background-size: cover;
+    background-position: center;
+}
+.page-header-bg.default {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    opacity: 1;
+}
+/* ✏️ FACILITY BG IMAGES: Replace the url() values below with your facility image file names */
+.page-header-bg.clinic {
+    /* ✏️ Replace "clinic_bg.jpg" with your clinic background image */
+    background: linear-gradient(rgba(128,0,0,0.65), rgba(128,0,0,0.65)), url("clinic_bg.jpg") center/cover no-repeat;
+    opacity: 0;
+}
+.page-header-bg.library {
+    /* ✏️ Replace "library_bg.jpg" with your library background image */
+    background: linear-gradient(rgba(30,60,128,0.65), rgba(30,60,128,0.65)), url("library_bg.jpg") center/cover no-repeat;
+    opacity: 0;
+}
+.page-header-bg.complab {
+    /* ✏️ Replace "complab_bg.jpg" with your computer lab background image */
+    background: linear-gradient(rgba(0,100,50,0.65), rgba(0,100,50,0.65)), url("complab_bg.jpg") center/cover no-repeat;
+    opacity: 0;
+}
+
+.page-header-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* ✏️ Edit the subtitle text below in the HTML */
+.page-header h1 { font-size: 2rem; margin-bottom: 8px; }
+.page-header p { opacity: 0.88; font-size: 1rem; }
+
+/* FACILITY CARDS GRID */
+.facilities-section {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 30px;
+}
+.facilities-section h2 {
+    font-size: 1.3rem;
+    color: var(--primary);
+    margin-bottom: 24px;
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+}
+
+/* ===============================
+   FACILITY CARD
+   ✏️ Edit card content in HTML below
+================================= */
+.facility-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 28px;
+}
+
+.facility-card {
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.facility-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+}
+
+/* ✏️ Replace background-color with background: url("your-image.jpg") center/cover */
+.facility-card .card-img {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.facility-card .card-body { padding: 20px; }
+.facility-card h3 { font-size: 1.15rem; margin-bottom: 6px; color: var(--primary); }
+.facility-card p { font-size: 0.9rem; color: #666; margin-bottom: 14px; line-height: 1.5; }
+
+.card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 16px;
+}
+.card-meta span { display: flex; align-items: center; gap: 4px; }
+
+.btn-book {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+.btn-book:hover { background: var(--secondary); }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .navbar { padding: 12px 16px; }
+    .page-header { padding: 36px 20px; }
+    .facilities-section { padding: 0 16px; }
+}
+
+
+/* ── NAV ICONS — hollow SVG style ── */
+.nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.nav-links a:hover, .nav-links a.active {
+    background: #f9e8e8;
+    color: var(--primary) !important;
+    font-weight: bold;
+    transform: translateY(-1px);
+}
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+.nav-links a:hover .nav-icon,
+.nav-links a.active .nav-icon {
+    transform: scale(1.2);
+}
+/* ── Logout button: raised red in dark mode ── */
+.btn-logout {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+/* ── Nav-right tight spacing ── */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ── GLOBAL DARK MODE — Black + Red high-contrast theme ── */
+body.dark-mode {
+    background: #0a0a0a !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .navbar {
+    background: #111111 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6) !important;
+    border-bottom: 1px solid #cc0000 !important;
+}
+body.dark-mode .nav-links a { color: #f0f0f0 !important; }
+body.dark-mode .logo { color: #ff3333 !important; }
+body.dark-mode .user-badge {
+    background: rgba(204,0,0,0.2) !important;
+    border-color: #cc0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .user-badge:hover {
+    background: rgba(204,0,0,0.35) !important;
+}
+body.dark-mode .btn-primary {
+    background: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-primary:hover { background: #aa0000 !important; }
+body.dark-mode .btn-logout {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-logout:hover { background: #aa0000 !important; border-color: #aa0000 !important; }
+body.dark-mode .nav-links a:hover,
+body.dark-mode .nav-links a.active {
+    background: rgba(204,0,0,0.2) !important;
+    color: #ff4444 !important;
+}
+
+body.dark-mode .page-header {
+    background: linear-gradient(to right, #330000, #660000) !important;
+}
+body.dark-mode .facilities-section h2 { color: #ff4444 !important; }
+body.dark-mode .facility-card {
+    background: #1a1a1a !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+    border: 1px solid #2a2a2a !important;
+}
+body.dark-mode .facility-card h3 { color: #ff4444 !important; }
+body.dark-mode .facility-card p { color: #cccccc !important; }
+body.dark-mode .card-meta { color: #888888 !important; }
+body.dark-mode .btn-book {
+    background: #cc0000 !important;
+    color: #fff !important;
+}
+body.dark-mode .btn-book:hover { background: #aa0000 !important; }
+
+
+/* ── LOGO IMAGE ── */
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    margin-right: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+/* ── PROFILE ICON BUTTON ── */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #f9e8e8;
+    border: 2px solid #e8c8c8;
+    font-size: 1.35rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    overflow: hidden;
+    padding: 0;
+}
+.user-badge:hover { background: #f0d0d0; transform: scale(1.08); }
+
+
+/* Preload dark mode to prevent flash */
+/* Preload dark mode to prevent flash */
+html.dark-mode-preload body,
+html.dark-mode-preload { background: #0a0a0a !important; }
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR — same across all pages -->
+<header class="navbar">
+    <!-- ✏️ LOGO IMAGE: Replace "ccse_logo.jpg" with your logo file name -->
+    <div class="logo"><a href="index.html"><img class="logo-img" src="ccse_logo.jpg" alt="CCSE"> CCSE Booking</a></div> 
+        <ul class="nav-links">
+        <li><a href="facilities.html" class="active"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="9" x2="21" y2="9"/><line x1="15" y1="15" x2="21" y2="15"/></svg>Facilities</a></li>
+        <li><a href="mybookings.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="16" y2="18"/></svg>My Bookings</a></li>
+        <li><a href="help.html"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>Help</a></li>
+    </ul>
+    <button class="btn-primary" onclick="location.href='booking.html'">Start Booking</button> <button onclick="localStorage.removeItem('ccse_session');location.href='login.html'" style="background:transparent;color:var(--primary);border:2px solid var(--primary);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.85rem;margin-left:4px;">Log Out</button>
+</header>
+
+<!-- PAGE HEADER — background changes when hovering facility cards -->
+<div class="page-header" id="page-header">
+    <!-- Background layers -->
+    <div class="page-header-bg default" id="bg-default"></div>
+    <div class="page-header-bg clinic"  id="bg-clinic"></div>
+    <div class="page-header-bg library" id="bg-library"></div>
+    <div class="page-header-bg complab" id="bg-complab"></div>
+    <!-- Content -->
+    <div class="page-header-content">
+        <h1>Our Facilities</h1>
+        <p>Browse available spaces and book your slot instantly.</p>
+    </div>
+</div>
+
+<!-- FACILITY CARDS -->
+<section class="facilities-section">
+    <h2>All Facilities</h2>
+
+    <div class="facility-grid">
+
+        <!-- ============================
+             ✏️ CARD 1 — CLINIC
+             Edit: emoji/image, title, description, hours, slots, button
+        ============================= -->
+        <div class="facility-card" data-facility="clinic">
+            <div class="card-img" style="background-color: #fde8e8;">
+                <!-- ✏️ Replace emoji with: <img src="clinic.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+                🏥
+            </div>
+            <div class="card-body">
+                <h3>Clinic</h3>
+                <!-- ✏️ Edit description -->
+                <p>Health checkups, consultations, and medical assistance for students and staff.</p>
+                <div class="card-meta">
+                    <!-- ✏️ Edit hours and slot count -->
+                    <span>🕐 8AM – 5PM</span>
+                    <span>💺 10 slots/day</span>
+                </div>
+                <button class="btn-book" onclick="bookFacility('clinic')">Book Clinic</button>
+            </div>
+        </div>
+
+        <!-- ============================
+             ✏️ CARD 2 — LIBRARY
+        ============================= -->
+        <div class="facility-card" data-facility="library">
+            <div class="card-img" style="background-color: #e8f0fd;">
+                <!-- ✏️ Replace emoji with: <img src="library.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+                📚
+            </div>
+            <div class="card-body">
+                <h3>Library</h3>
+                <p>Quiet study area, research resources, and reference materials available daily.</p>
+                <div class="card-meta">
+                    <span>🕐 7AM – 8PM</span>
+                    <span>💺 40 slots/day</span>
+                </div>
+                <button class="btn-book" onclick="bookFacility('library')">Book Library</button>
+            </div>
+        </div>
+
+        <!-- ============================
+             ✏️ CARD 3 — COMPUTER LAB
+        ============================= -->
+        <div class="facility-card" data-facility="complab">
+            <div class="card-img" style="background-color: #e8fde8;">
+                <!-- ✏️ Replace emoji with: <img src="complab.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+                🖥️
+            </div>
+            <div class="card-body">
+                <h3>Computer Lab</h3>
+                <p>Access to computers, software tools, and high-speed internet for academic use.</p>
+                <div class="card-meta">
+                    <span>🕐 8AM – 6PM</span>
+                    <span>💺 30 slots/day</span>
+                </div>
+                <button class="btn-book" onclick="bookFacility('complab')">Book Computer Lab</button>
+            </div>
+        </div>
+
+        <!-- ============================
+             ✏️ ADD MORE CARDS HERE
+             Copy a card block above and paste below
+        ============================= -->
+
+    </div>
+</section>
+
+<script>
+// ── FACILITY CARD HOVER — changes page header background ──
+(function() {
+    const cards = document.querySelectorAll('.facility-card[data-facility]');
+    const bgs = {
+        default: document.getElementById('bg-default'),
+        clinic:  document.getElementById('bg-clinic'),
+        library: document.getElementById('bg-library'),
+        complab: document.getElementById('bg-complab'),
+    };
+
+    function showBg(name) {
+        Object.keys(bgs).forEach(k => {
+            bgs[k].style.opacity = k === name ? '1' : '0';
+        });
+    }
+
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            showBg(card.dataset.facility);
+        });
+        card.addEventListener('mouseleave', () => {
+            showBg('default');
+        });
+    });
+})();
+
+
+// ── Book facility with pre-selection ──
+function bookFacility(facilityKey) {
+    // Map card key to booking.html select value
+    const map = {               
+        'clinic':  'clinic',
+        'library': 'library',
+        'complab': 'lab'
+    };
+    const val = map[facilityKey] || facilityKey;
+    location.href = 'booking.html?facility=' + encodeURIComponent(val);
+}
+</script>
+
+<script>
+(function(){
+    var s = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+    if (!s) { location.href = 'login.html'; }
+    else if (s.role === 'admin') { location.href = 'admin.html'; }
+})();
+</script>
+
+<script>
+// ── Apply saved dark mode theme on every page load ──
+(function() {
+    if (localStorage.getItem('ccse_theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+})();
+</script>
+</body>
+</html>

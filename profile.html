@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+// Prevent flash — apply dark mode before page renders
+if (localStorage.getItem('ccse_theme') === 'dark') {
+    document.documentElement.classList.add('dark-mode-preload');
+}
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — CCSE</title>
+<style>
+:root {
+    --primary: #800000;
+    --secondary: #a52a2a;
+    --bg: #f5f5f5;
+    --text: #333;
+    --white: #fff;
+    --border: #ddd;
+    --input-focus: #f9e8e8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: var(--bg); color: var(--text); }
+
+/* NAVBAR */
+.navbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 40px; background: var(--white);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.logo { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+.logo a { text-decoration: none; color: inherit; }
+.nav-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: var(--text); }
+.nav-links a:hover { color: var(--primary); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.user-badge {
+    font-size: 0.85rem; color: var(--primary);
+    background: #f9e8e8; padding: 6px 12px;
+    border-radius: 20px; border: 1px solid #e8c8c8;
+    cursor: pointer; font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.user-badge:hover { background: #f0d0d0; }
+.btn-primary {
+    background: var(--primary); color: white;
+    padding: 10px 16px; border: none; border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem; transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--secondary); }
+.btn-logout {
+    background: transparent; color: var(--primary);
+    border: 2px solid var(--primary); padding: 8px 14px;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+
+/* PAGE HEADER */
+.page-header {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white; padding: 50px 40px 70px; text-align: center;
+}
+.page-header h1 { font-size: 1.8rem; margin-bottom: 6px; }
+.page-header p { opacity: 0.85; font-size: 0.95rem; }
+
+/* AVATAR CIRCLE */
+.avatar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: -48px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+}
+.avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 2.2rem;
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    text-transform: uppercase;
+}
+
+/* CONTENT */
+.content {
+    max-width: 680px;
+    margin: 0 auto 60px;
+    padding: 0 24px;
+}
+
+/* CARDS */
+.profile-card {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 18px 28px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; gap: 10px;
+}
+.card-header h2 {
+    font-size: 1rem; color: var(--primary);
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+}
+
+.card-body { padding: 24px 28px; }
+
+/* INFO GRID */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.info-item .label {
+    font-size: 0.75rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+.info-item .value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* FORM */
+.form-group { margin-bottom: 18px; }
+.form-group label {
+    display: block; font-size: 0.87rem;
+    font-weight: bold; margin-bottom: 6px;
+}
+.form-group input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 0.93rem;
+    color: var(--text); outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+.form-group input:focus {
+    border-color: var(--primary);
+    background: var(--input-focus);
+}
+
+/* PASSWORD STRENGTH */
+.strength-wrap { margin-top: 6px; }
+.strength-bar-bg { height: 4px; background: #eee; border-radius: 2px; }
+.strength-bar { height: 100%; border-radius: 2px; width: 0; transition: width 0.3s, background 0.3s; }
+.strength-text { font-size: 0.75rem; color: #aaa; margin-top: 3px; }
+
+/* ALERT */
+.alert {
+    padding: 11px 14px; border-radius: 8px;
+    font-size: 0.87rem; margin-bottom: 16px; display: none;
+}
+.alert.error   { background: #fdecea; color: #c62828; border-left: 4px solid #c62828; }
+.alert.success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+.alert.show    { display: block; }
+
+/* SAVE BUTTON */
+.btn-save {
+    padding: 11px 28px;
+    background: var(--primary); color: white;
+    border: none; border-radius: 8px;
+    font-size: 0.95rem; font-weight: bold;
+    cursor: pointer; transition: background 0.2s, transform 0.1s;
+}
+.btn-save:hover { background: var(--secondary); }
+.btn-save:active { transform: scale(0.98); }
+
+/* BOOKINGS MINI LIST */
+.mini-booking {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+    gap: 10px; flex-wrap: wrap;
+}
+.mini-booking:last-child { border-bottom: none; }
+.mini-booking .fac { font-weight: bold; font-size: 0.9rem; }
+.mini-booking .meta { font-size: 0.8rem; color: #888; margin-top: 2px; }
+.mini-badge {
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: bold; white-space: nowrap;
+}
+.mini-badge.confirmed  { background: #e8f5e9; color: #2e7d32; }
+.mini-badge.pending    { background: #fff8e1; color: #f57f17; }
+.mini-badge.cancelled  { background: #fdecea; color: #c62828; }
+.mini-badge.completed  { background: #e8eaf6; color: #3949ab; }
+
+.empty-mini { text-align: center; padding: 28px; color: #bbb; font-size: 0.9rem; }
+
+@media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .navbar { padding: 12px 16px; }
+    .page-header { padding: 40px 20px 60px; }
+}
+
+/* ── NAV ICONS — hollow SVG style ── */
+.nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.nav-links a:hover, .nav-links a.active {
+    background: #f9e8e8;
+    color: var(--primary) !important;
+    font-weight: bold;
+    transform: translateY(-1px);
+}
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+.nav-links a:hover .nav-icon,
+.nav-links a.active .nav-icon {
+    transform: scale(1.2);
+}
+/* ── Logout button: raised red in dark mode ── */
+.btn-logout {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+/* ── Nav-right tight spacing ── */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ── DARK MODE — matches site-wide black/red theme ── */
+body.dark-mode {
+    background: #0a0a0a !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .navbar {
+    background: #111111 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6) !important;
+    border-bottom: 1px solid #cc0000 !important;
+}
+body.dark-mode .logo { color: #ff3333 !important; }
+body.dark-mode .nav-links a { color: #f0f0f0 !important; }
+body.dark-mode .nav-links a:hover,
+body.dark-mode .nav-links a.active {
+    background: rgba(204,0,0,0.2) !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .user-badge {
+    background: rgba(204,0,0,0.2) !important;
+    border-color: #cc0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .user-badge:hover { background: rgba(204,0,0,0.35) !important; }
+body.dark-mode .btn-primary { background: #cc0000 !important; color: #fff !important; }
+body.dark-mode .btn-primary:hover { background: #aa0000 !important; }
+body.dark-mode .btn-logout {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-logout:hover { background: #aa0000 !important; border-color: #aa0000 !important; }
+body.dark-mode .page-header {
+    background: linear-gradient(to right, #330000, #660000) !important;
+}
+body.dark-mode .profile-card {
+    background: #1a1a1a !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5) !important;
+    border: 1px solid #2a2a2a !important;
+}
+body.dark-mode .card-header {
+    border-bottom-color: #333 !important;
+}
+body.dark-mode .card-header h2 { color: #ff4444 !important; }
+body.dark-mode .mini-booking { border-bottom-color: #2a2a2a !important; }
+body.dark-mode .info-item .label { color: #888 !important; }
+body.dark-mode .info-item .value { color: #f0f0f0 !important; }
+body.dark-mode .form-group input {
+    background: #222 !important;
+    color: #f0f0f0 !important;
+    border-color: #444 !important;
+}
+body.dark-mode .form-group input:focus { border-color: #cc0000 !important; background: #2a0000 !important; }
+body.dark-mode .form-group label { color: #f0f0f0 !important; }
+body.dark-mode .strength-bar-bg { background: #333 !important; }
+body.dark-mode .alert.error   { background: #3a0000 !important; color: #ff6666 !important; }
+body.dark-mode .alert.success { background: #003a00 !important; color: #66ff66 !important; }
+body.dark-mode .mini-badge.confirmed  { background: #003a00 !important; color: #66cc66 !important; }
+body.dark-mode .mini-badge.pending    { background: #3a2a00 !important; color: #ccaa00 !important; }
+body.dark-mode .mini-badge.cancelled  { background: #3a0000 !important; color: #cc4444 !important; }
+body.dark-mode .mini-badge.completed  { background: #00003a !important; color: #6666cc !important; }
+body.dark-mode .mini-booking .fac { color: #f0f0f0 !important; }
+body.dark-mode .mini-booking .meta { color: #999 !important; }
+body.dark-mode .empty-mini { color: #666 !important; }
+/* DARK MODE TOGGLE SWITCH */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+}
+.theme-toggle span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+}
+.theme-toggle .toggle-desc {
+    font-size: 0.78rem;
+    color: #aaa;
+    font-weight: normal;
+}
+.switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 28px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.slider::before {
+    content: "";
+    position: absolute;
+    width: 22px; height: 22px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.switch input:checked + .slider { background: var(--primary); }
+.switch input:checked + .slider::before { transform: translateX(24px); }
+.theme-icon { font-size: 1.1rem; }
+
+
+/* ── LOGO IMAGE ── */
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    margin-right: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+/* ── PROFILE ICON BUTTON ── */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #f9e8e8;
+    border: 2px solid #e8c8c8;
+    font-size: 1.35rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    overflow: hidden;
+    padding: 0;
+}
+.user-badge:hover { background: #f0d0d0; transform: scale(1.08); }
+
+
+/* Preload dark mode to prevent flash */
+/* Preload dark mode to prevent flash */
+html.dark-mode-preload body,
+html.dark-mode-preload { background: #0a0a0a !important; }
+
+</style>
+</head>
+<body>
+
+<header class="navbar">
+   <!-- ✏️ LOGO IMAGE: Replace "ccse_logo.jpg" with your logo file name -->
+   <div class="logo"><a href="index.html"><img class="logo-img" src="ccse_logo.jpg" alt="CCSE"> CCSE Booking</a></div> 
+    <ul class="nav-links">
+        <li><a href="facilities.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="9" x2="21" y2="9"/><line x1="15" y1="15" x2="21" y2="15"/></svg>Facilities</a></li>
+        <li><a href="mybookings.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="16" y2="18"/></svg>My Bookings</a></li>
+        <li><a href="help.html"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>Help</a></li>
+    </ul>
+    <div class="nav-right">
+        <a class="user-badge" href="profile.html" id="user-badge" title="My Profile"><svg class="nav-icon" style="width:22px;height:22px;stroke-width:1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+        <button class="btn-primary" onclick="location.href='booking.html'">Start Booking</button>
+        <button class="btn-logout" onclick="doLogout()">Log Out</button>
+    </div>
+</header>
+
+<div class="page-header">
+    <h1>My Profile</h1>
+    <p>Manage your account information and password.</p>
+</div>
+
+<!-- AVATAR -->
+<div class="avatar-wrap">
+    <div class="avatar" id="avatar-initials">?</div>
+</div>
+
+<div class="content">
+
+    <!-- ACCOUNT INFO CARD -->
+    <div class="profile-card">
+        <div class="card-header">
+            <h2>Account Information</h2>
+        </div>
+        <div class="card-body">
+            <div class="info-grid" id="info-grid">
+                <!-- filled by JS -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- APPEARANCE CARD -->
+    <div class="profile-card">
+        <div class="card-header">
+            <h2>⚙️ Appearance</h2>
+        </div>
+        <div class="theme-toggle">
+            <span class="theme-icon" id="theme-icon">☀️</span>
+            <span>Dark Mode <span class="toggle-desc">— easier on the eyes at night</span></span>
+            <label class="switch">
+                <input type="checkbox" id="dark-toggle" onchange="toggleDarkMode(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD CARD -->
+    <div class="profile-card">
+        <div class="card-header">
+            <h2>Change Password</h2>
+        </div>
+        <div class="card-body">
+            <div class="alert error"   id="pw-error"></div>
+            <div class="alert success" id="pw-success"></div>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="pw-current" placeholder="Enter your current password">
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="pw-new" placeholder="At least 8 characters" oninput="checkStrength(this.value)">
+                <div class="strength-wrap">
+                    <div class="strength-bar-bg"><div class="strength-bar" id="strength-bar"></div></div>
+                    <div class="strength-text" id="strength-text"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="pw-confirm" placeholder="Repeat new password">
+            </div>
+            <button class="btn-save" onclick="changePassword()">Save New Password</button>
+        </div>
+    </div>
+
+    <!-- RECENT BOOKINGS CARD -->
+    <div class="profile-card">
+        <div class="card-header">
+            <h2>My Recent Bookings</h2>
+        </div>
+        <div class="card-body" id="recent-bookings">
+            <!-- filled by JS -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+// =============================================
+// AUTH GUARD
+// =============================================
+const session = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+if (!session) { location.href = 'login.html'; }
+
+
+// =============================================
+// POPULATE PROFILE INFO
+// =============================================
+function loadProfile() {
+    const users = JSON.parse(localStorage.getItem('ccse_users') || '[]');
+    const user  = users.find(u => u.studentId === session.studentId);
+
+    // Avatar initials
+    const initials = session.name ? session.name.split(' ').map(n => n[0]).slice(0,2).join('') : '?';
+    document.getElementById('avatar-initials').textContent = initials;
+    // user-badge is now an icon circle — just update its title tooltip
+    const badge = document.getElementById('user-badge');
+    if (badge) badge.title = session.name || 'My Profile';
+
+    if (!user) return;
+
+    const regDate = new Date(user.registeredAt).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+    document.getElementById('info-grid').innerHTML = `
+        <div class="info-item">
+            <div class="label">Full Name</div>
+            <div class="value">${user.firstName} ${user.lastName}</div>
+        </div>
+        <div class="info-item">
+            <div class="label">Student ID</div>
+            <div class="value">${user.studentId}</div>
+        </div>
+        <div class="info-item">
+            <div class="label">Email</div>
+            <div class="value">${user.email}</div>
+        </div>
+        <div class="info-item">
+            <div class="label">Year & Section</div>
+            <div class="value">${user.yearSec || '—'}</div>
+        </div>
+        <div class="info-item">
+            <div class="label">Contact</div>
+            <div class="value">${user.contact || '—'}</div>
+        </div>
+        <div class="info-item">
+            <div class="label">Member Since</div>
+            <div class="value">${regDate}</div>
+        </div>
+    `;
+}
+
+// =============================================
+// RECENT BOOKINGS
+// =============================================
+function loadRecentBookings() {
+    const all = JSON.parse(localStorage.getItem('ccse_bookings') || '[]');
+    const mine = all
+        .filter(b => b.studentId === session.studentId)
+        .slice(-5).reverse();
+
+    const container = document.getElementById('recent-bookings');
+    if (mine.length === 0) {
+        container.innerHTML = '<div class="empty-mini">No bookings yet. <a href="Booking.html" style="color:var(--primary)">Book now →</a></div>';
+        return;
+    }
+
+    container.innerHTML = mine.map(b => {
+        const svcs = Array.isArray(b.services) ? b.services.join(', ') : (b.services || '—');
+        const st = b.status || 'pending';
+        return `
+        <div class="mini-booking">
+            <div>
+                <div class="fac">${b.emoji || '📋'} ${b.facility}</div>
+                <div class="meta">📅 ${b.date} &nbsp;·&nbsp; ⏰ ${b.time}</div>
+                <div class="meta" style="margin-top:2px;color:#aaa">${svcs}</div>
+            </div>
+            <span class="mini-badge ${st}">${capitalize(st)}</span>
+        </div>`;
+    }).join('');
+}
+
+// =============================================
+// PASSWORD STRENGTH
+// =============================================
+function checkStrength(val) {
+    const bar = document.getElementById('strength-bar');
+    const txt = document.getElementById('strength-text');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+        { w:'0%',   c:'#eee',    t:'' },
+        { w:'30%',  c:'#e53935', t:'Weak' },
+        { w:'55%',  c:'#fb8c00', t:'Fair' },
+        { w:'80%',  c:'#43a047', t:'Strong' },
+        { w:'100%', c:'#2e7d32', t:'Very Strong' },
+    ];
+    const l = levels[score];
+    bar.style.width = l.w; bar.style.background = l.c;
+    txt.textContent = l.t; txt.style.color = l.c;
+}
+
+// =============================================
+// CHANGE PASSWORD
+// =============================================
+function changePassword() {
+    const elErr = document.getElementById('pw-error');
+    const elOk  = document.getElementById('pw-success');
+    elErr.classList.remove('show'); elOk.classList.remove('show');
+
+    const cur  = document.getElementById('pw-current').value;
+    const nw   = document.getElementById('pw-new').value;
+    const conf = document.getElementById('pw-confirm').value;
+
+    if (!cur || !nw || !conf) {
+        elErr.textContent = 'Please fill in all fields.'; elErr.classList.add('show'); return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('ccse_users') || '[]');
+    const idx   = users.findIndex(u => u.studentId === session.studentId);
+
+    if (idx === -1) {
+        elErr.textContent = 'Account not found.'; elErr.classList.add('show'); return;
+    }
+
+    if (users[idx].password !== btoa(cur)) {
+        elErr.textContent = 'Current password is incorrect.'; elErr.classList.add('show'); return;
+    }
+    if (nw.length < 8) {
+        elErr.textContent = 'New password must be at least 8 characters.'; elErr.classList.add('show'); return;
+    }
+    if (nw !== conf) {
+        elErr.textContent = 'New passwords do not match.'; elErr.classList.add('show'); return;
+    }
+
+    users[idx].password = btoa(nw);
+    localStorage.setItem('ccse_users', JSON.stringify(users));
+
+    document.getElementById('pw-current').value = '';
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-confirm').value = '';
+    document.getElementById('strength-bar').style.width = '0';
+    document.getElementById('strength-text').textContent = '';
+
+    elOk.textContent = '✅ Password changed successfully!';
+    elOk.classList.add('show');
+}
+
+// =============================================
+// HELPERS
+// =============================================
+function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+function doLogout() {
+    localStorage.removeItem('ccse_session');
+    location.href = 'login.html';
+}
+
+
+// =============================================
+// DARK MODE
+// =============================================
+function toggleDarkMode(on) {
+    document.body.classList.toggle('dark-mode', on);
+    localStorage.setItem('ccse_theme', on ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = on ? '🌙' : '☀️';
+}
+
+function applyTheme() {
+    const saved = localStorage.getItem('ccse_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = saved ? saved === 'dark' : prefersDark;
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-toggle').checked = true;
+        document.getElementById('theme-icon').textContent = '🌙';
+    }
+}
+applyTheme();
+
+// =============================================
+// INIT
+// =============================================
+loadProfile();     
+loadRecentBookings();
+</script>
+</body>
+</html>
+  
+  
+  
+            

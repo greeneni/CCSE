@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — CCSE Appointment Booking</title>
+<style>
+:root {
+    --primary: #800000;
+    --secondary: #a52a2a;
+    --bg: #f5f5f5;
+    --text: #333;
+    --white: #fff;
+    --border: #ddd;
+    --input-focus: #f9e8e8;
+    --error: #c62828;                     
+    --success: #2e7d32;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* NAVBAR */
+.navbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 40px; background: var(--white);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.logo { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+
+/* PAGE LAYOUT */
+.auth-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background-image: url("2logos_BG.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.auth-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(128, 0, 0, 0.45);
+    z-index: 0;
+}
+
+.auth-card {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* TABS */
+.auth-tabs {
+    display: flex;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 18px;
+    text-align: center;
+    font-size: 0.97rem;
+    font-weight: bold;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.auth-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* FORM PANELS */
+.auth-panel { display: none; padding: 32px 36px 36px; background: transparent; }
+.auth-panel.active { display: block; }
+
+.auth-panel h2 {
+    color: #fff;
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.auth-panel .subtitle {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 24px;
+}
+
+.form-group { margin-bottom: 18px; }
+.form-group label {
+    display: block;
+    font-size: 0.87rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: rgba(255,255,255,0.9);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 8px;
+    font-size: 0.93rem;
+    color: #222;
+    background: rgba(255,255,255,0.85);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+.form-group input::placeholder { color: #999; }
+
+.form-group input:focus {
+    border-color: var(--primary);
+    background: var(--input-focus);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.btn-auth {
+    width: 100%;
+    padding: 13px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.1s;
+}
+.btn-auth:hover { background: var(--secondary); }
+.btn-auth:active { transform: scale(0.98); }
+
+/* ALERT MESSAGES */
+.alert {
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    margin-bottom: 16px;
+    display: none;
+}
+.alert.error { background: #fdecea; color: var(--error); border-left: 4px solid var(--error); }
+.alert.success { background: #e8f5e9; color: var(--success); border-left: 4px solid var(--success); }
+.alert.show { display: block; }
+
+/* PASSWORD STRENGTH */
+.strength-bar-wrap { margin-top: 6px; height: 4px; background: #eee; border-radius: 2px; }
+.strength-bar { height: 100%; border-radius: 2px; width: 0; transition: width 0.3s, background 0.3s; }
+.strength-label { font-size: 0.75rem; color: #999; margin-top: 3px; }
+
+/* DIVIDER */
+.divider {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.82rem;
+    margin: 20px 0;
+    position: relative;
+}
+.divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--border);
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+/* SWITCH LINK */
+.switch-link {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 18px;
+}
+.switch-link a { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: none; }
+.switch-link a:hover { text-decoration: underline; }
+
+/* REQUIRED STAR */
+.req { color: var(--primary); }
+
+</style>
+</head>
+<body>
+
+<header class="navbar">
+    
+</header>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+
+        <!-- TABS -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log In</button>
+            <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <!-- ===================== LOGIN PANEL ===================== -->
+        <div class="auth-panel active" id="panel-login">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Log in to manage your appointments.</p>
+
+            <div class="alert error" id="login-error"></div>
+            <div class="alert success" id="login-success"></div>
+
+            <div class="form-group">
+                <label>Student ID or Email <span class="req">*</span></label>
+                <input type="text" id="login-id" placeholder="e.g. 25-00000 or you@school.edu" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label>Password <span class="req">*</span></label>
+                <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+            </div>
+
+            <button class="btn-auth" onclick="doLogin()">Log In</button>
+
+            <div class="switch-link">
+                No account yet? <a onclick="switchTab('register')">Register here</a>
+            </div>
+
+
+        </div>
+
+        <!-- ===================== REGISTER PANEL ===================== -->
+        <div class="auth-panel" id="panel-register">
+            <h2>Create Account</h2>
+            <p class="subtitle">Register to start booking CCSE facilities.</p>
+
+            <div class="alert error" id="reg-error"></div>
+            <div class="alert success" id="reg-success"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name <span class="req">*</span></label>
+                    <input type="text" id="reg-fname" placeholder="Juan">
+                </div>
+                <div class="form-group">
+                    <label>Last Name <span class="req">*</span></label>
+                    <input type="text" id="reg-lname" placeholder="Dela Cruz">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Student ID <span class="req">*</span></label>
+                <input type="text" id="reg-studentid" placeholder="e.g. 25-00000">
+            </div>
+
+            <div class="form-group">
+                <label>School Email <span class="req">*</span></label>
+                <input type="email" id="reg-email" placeholder="you@school.edu">
+            </div>
+
+            <div class="form-group">
+                <label>Year & Section <span class="req">*</span></label>
+                <input type="text" id="reg-yearsec" placeholder="e.g. 4th, 3-A">
+            </div>
+
+            <div class="form-group">
+                <label>Contact Number</label>
+                <input type="tel" id="reg-contact" placeholder="09XX-XXX-XXXX">
+            </div>
+
+            <div class="form-group">
+                <label>Password <span class="req">*</span></label>
+                <input type="password" id="reg-pass" placeholder="At least 8 characters" oninput="checkStrength(this.value)">
+                <div class="strength-bar-wrap"><div class="strength-bar" id="strength-bar"></div></div>
+                <div class="strength-label" id="strength-label"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password <span class="req">*</span></label>
+                <input type="password" id="reg-pass2" placeholder="Repeat your password">
+            </div>
+
+            <button class="btn-auth" onclick="doRegister()">Create Account</button>
+
+            <div class="switch-link">
+                Already have an account? <a onclick="switchTab('login')">Log in</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// =============================================
+// TAB SWITCHING
+// =============================================
+function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+    clearAlerts();
+}
+
+function clearAlerts() {
+    document.querySelectorAll('.alert').forEach(a => {
+        a.classList.remove('show');
+        a.textContent = '';
+    });
+}
+
+function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'alert ' + type + ' show';
+}
+
+// =============================================
+// PASSWORD STRENGTH
+// =============================================
+function checkStrength(val) {
+    const bar = document.getElementById('strength-bar');
+    const label = document.getElementById('strength-label');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+        { w: '0%',   color: '#eee',    text: '' },
+        { w: '30%',  color: '#e53935', text: 'Weak' },
+        { w: '55%',  color: '#fb8c00', text: 'Fair' },
+        { w: '80%',  color: '#43a047', text: 'Strong' },
+        { w: '100%', color: '#2e7d32', text: 'Very Strong' },
+    ];
+
+    const lvl = levels[score];
+    bar.style.width = lvl.w;
+    bar.style.background = lvl.color;
+    label.textContent = lvl.text;
+    label.style.color = lvl.color;
+}
+
+// =============================================
+// USER STORAGE HELPERS
+// =============================================
+function getUsers() {
+    return JSON.parse(localStorage.getItem('ccse_users') || '[]');
+}
+
+function saveUsers(users) {
+    localStorage.setItem('ccse_users', JSON.stringify(users));
+}
+
+function setSession(user) {
+    const session = {
+        studentId: user.studentId,
+        name: user.firstName + ' ' + user.lastName,
+        email: user.email,
+        yearSec: user.yearSec,
+        contact: user.contact || '',
+        role: user.role || 'student'
+    };
+    localStorage.setItem('ccse_session', JSON.stringify(session));
+}
+
+// =============================================
+// REGISTER
+// =============================================
+function doRegister() {
+    clearAlerts();
+
+    const fname    = document.getElementById('reg-fname').value.trim();
+    const lname    = document.getElementById('reg-lname').value.trim();
+    const studentId= document.getElementById('reg-studentid').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const yearSec  = document.getElementById('reg-yearsec').value.trim();
+    const contact  = document.getElementById('reg-contact').value.trim();
+    const pass     = document.getElementById('reg-pass').value;
+    const pass2    = document.getElementById('reg-pass2').value;
+
+    // Validation
+    if (!fname || !lname || !studentId || !email || !yearSec || !pass || !pass2) {
+        showAlert('reg-error', 'Please fill in all required fields.', 'error'); return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        showAlert('reg-error', 'Please enter a valid email address.', 'error'); return;
+    }
+    if (pass.length < 8) {
+        showAlert('reg-error', 'Password must be at least 8 characters.', 'error'); return;
+    }
+    if (pass !== pass2) {
+        showAlert('reg-error', 'Passwords do not match.', 'error'); return;
+    }
+
+    const users = getUsers();
+
+    // Check duplicates
+    if (users.find(u => u.studentId === studentId)) {
+        showAlert('reg-error', 'A student with this ID is already registered.', 'error'); return;
+    }
+    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+        showAlert('reg-error', 'This email is already registered.', 'error'); return;
+    }
+
+    const newUser = {
+        id: 'USR-' + Date.now(),
+        firstName: fname,
+        lastName: lname,
+        studentId,
+        email,
+        yearSec,
+        contact,
+        password: btoa(pass), // basic obfuscation (not cryptographic)
+        role: 'student',
+        registeredAt: new Date().toISOString(),
+        status: 'active'
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    showAlert('reg-success', '✅ Account created! You can now log in.', 'success');
+
+    // Clear fields
+    ['reg-fname','reg-lname','reg-studentid','reg-email','reg-yearsec','reg-contact','reg-pass','reg-pass2']
+        .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('strength-bar').style.width = '0';
+    document.getElementById('strength-label').textContent = '';
+
+    // Auto-switch to login after 1.5s
+    setTimeout(() => switchTab('login'), 1600);
+}
+
+// =============================================
+// LOGIN
+// =============================================
+function doLogin() {
+    clearAlerts();
+
+    const identifier = document.getElementById('login-id').value.trim();
+    const pass = document.getElementById('login-pass').value;
+
+    if (!identifier || !pass) {
+        showAlert('login-error', 'Please enter your ID/email and password.', 'error'); return;
+    }
+
+    // Check admin credentials first
+    // Default admin: admin / admin123
+    const adminCreds = JSON.parse(localStorage.getItem('ccse_admin') || '{"username":"admin","password":"' + btoa('password') + '"}');
+    if ((identifier === 'admin' || identifier === adminCreds.username) && btoa(pass) === adminCreds.password) {
+        localStorage.setItem('ccse_session', JSON.stringify({
+            studentId: 'ADMIN',
+            name: 'Administrator',
+            email: 'admin@ccse.edu',
+            role: 'admin'
+        }));
+        showAlert('login-success', '✅ Logged in as Administrator...', 'success');
+        setTimeout(() => location.href = 'admin.html', 1000);
+        return;
+    }
+
+    const users = getUsers();
+    const user = users.find(u =>
+        (u.studentId === identifier || u.email.toLowerCase() === identifier.toLowerCase()) &&
+        u.password === btoa(pass)
+    );
+
+    if (!user) {
+        showAlert('login-error', 'Incorrect ID/email or password. Please try again.', 'error'); return;
+    }
+
+    if (user.status === 'suspended') {
+        showAlert('login-error', 'Your account has been suspended. Please contact the admin.', 'error'); return;
+    }
+
+    setSession(user);
+    showAlert('login-success', '✅ Login successful! Redirecting...', 'success');
+    setTimeout(() => location.href = 'index.html', 1000);
+}
+
+// =============================================
+// ENTER KEY SUPPORT
+// =============================================
+document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const loginActive = document.getElementById('panel-login').classList.contains('active');
+    if (loginActive) doLogin(); else doRegister();
+});
+
+// =============================================
+// IF ALREADY LOGGED IN, REDIRECT
+// =============================================
+(function() {
+    const session = localStorage.getItem('ccse_session');
+    if (session) {
+        const s = JSON.parse(session);
+        if (s.role === 'admin') location.href = 'admin.html';
+        else location.href = 'index.html';
+    }
+})();
+</script>
+</body>
+</html>

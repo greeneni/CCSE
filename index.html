@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+// Prevent flash — apply dark mode before page renders
+if (localStorage.getItem('ccse_theme') === 'dark') {
+    document.documentElement.classList.add('dark-mode-preload');
+}
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCSE Appointment Booking System</title>
+
+<style>
+
+:root {
+    --primary: #800000;      
+    --secondary: #a52a2a;     
+    --bg: #f5f5f5;
+    --text: #333;
+    --white: #fff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: var(--bg);
+}
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background: var(--white);
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.logo {
+    font-weight: bold;
+    color: var(--primary);
+}
+    .logo a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-badge {
+    font-size: 0.85rem;
+    color: var(--primary);
+    background: #f9e8e8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #e8c8c8;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.user-badge:hover { background: #f0d0d0; }
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--secondary); }
+
+.btn-logout {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+
+/* HERO */
+.hero {
+    position: relative;
+    min-height: 500px;
+    overflow: hidden;
+}
+
+/* IMAGE — full width, shifted right so left portion is visible */
+.hero-image {
+    position: absolute;
+    inset: 0;
+    /* ✏️ HERO BACKGROUND IMAGE: Replace "bgp.png" with your background image file name */
+    background: url("bgp.png") right center / cover no-repeat;
+    background-color: #c8a0a0;
+    z-index: 0;
+}
+
+/* LEFT PANEL — solid maroon fading to transparent on the right edge */
+.hero-text {
+    position: relative;
+    z-index: 2;
+    width: 60%;
+    min-height: 500px;
+    background: linear-gradient(to right,
+        var(--primary) 40%,
+        rgba(128, 0, 0, 0.85) 60%,
+        rgba(128, 0, 0, 0) 100%
+    );
+    color: white;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* HIGHLIGHTED button — white with maroon text + glow ring */
+.hero-text .btn-primary {
+    align-self: flex-start;
+    background: #fff;
+    color: var(--primary);
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.5),
+        0 6px 20px rgba(0, 0, 0, 0.35);
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+
+.hero-text .btn-primary:hover {
+    background: #f5e0e0;
+    box-shadow:
+        0 0 0 5px rgba(255, 255, 255, 0.7),
+        0 10px 28px rgba(0, 0, 0, 0.45);
+    transform: translateY(-2px);
+}
+
+/* BOOKING FORM */
+.booking-box {
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 15px;
+    margin: 20px auto;
+    width: 80%;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+.booking-box select,
+.booking-box input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* FACILITIES */
+.facilities {
+    padding: 40px;
+    text-align: center;
+}
+
+.facility-grid {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .hero-text {
+        width: 100%;
+        background: linear-gradient(to bottom,
+            rgba(128,0,0,0.95) 50%,
+            rgba(128,0,0,0) 100%
+        );
+        text-align: center;
+        padding: 60px 20px;
+        align-items: center;
+    }
+
+    .hero-text .btn-primary {
+        align-self: center;
+    }
+
+    .booking-box {
+        flex-direction: column;
+        width: 90%;
+    }
+
+    .navbar { padding: 12px 16px; }
+    .user-badge { display: none; }
+}
+
+
+/* ── NAV ICONS — hollow SVG style ── */
+.nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.nav-links a:hover, .nav-links a.active {
+    background: #f9e8e8;
+    color: var(--primary) !important;
+    font-weight: bold;
+    transform: translateY(-1px);
+}
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+.nav-links a:hover .nav-icon,
+.nav-links a.active .nav-icon {
+    transform: scale(1.2);
+}
+/* ── Logout button: raised red in dark mode ── */
+.btn-logout {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-logout:hover { background: var(--primary); color: white; }
+/* ── Nav-right tight spacing ── */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ── GLOBAL DARK MODE — Black + Red high-contrast theme ── */
+body.dark-mode {
+    background: #0a0a0a !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .navbar {
+    background: #111111 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6) !important;
+    border-bottom: 1px solid #cc0000 !important;
+}
+body.dark-mode .nav-links a { color: #f0f0f0 !important; }
+body.dark-mode .logo { color: #ff3333 !important; }
+body.dark-mode .user-badge {
+    background: rgba(204,0,0,0.2) !important;
+    border-color: #cc0000 !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .user-badge:hover {
+    background: rgba(204,0,0,0.35) !important;
+}
+body.dark-mode .btn-primary {
+    background: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-primary:hover { background: #aa0000 !important; }
+body.dark-mode .btn-logout {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #ffffff !important;
+}
+body.dark-mode .btn-logout:hover { background: #aa0000 !important; border-color: #aa0000 !important; }
+body.dark-mode .nav-links a:hover,
+body.dark-mode .nav-links a.active {
+    background: rgba(204,0,0,0.2) !important;
+    color: #ff4444 !important;
+}
+body.dark-mode .booking-box {
+    background: #1a1a1a !important;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5) !important;
+    border: 1px solid #333 !important;
+}
+body.dark-mode .booking-box select,
+body.dark-mode .booking-box input {
+    background: #222222 !important;
+    color: #f0f0f0 !important;
+    border-color: #444 !important;
+}
+body.dark-mode #av-result { color: #f0f0f0 !important; }
+body.dark-mode .facilities {
+    background: #0a0a0a !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .facilities h2 { color: #ff4444 !important; }
+body.dark-mode .card {
+    background: #1a1a1a !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5) !important;
+    border: 1px solid #333 !important;
+    color: #f0f0f0 !important;
+}
+body.dark-mode .card h3 { color: #ff4444 !important; }
+body.dark-mode .card p { color: #cccccc !important; }
+
+
+/* ── LOGO IMAGE ── */
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    margin-right: 8px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+/* ── PROFILE ICON BUTTON ── */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #f9e8e8;
+    border: 2px solid #e8c8c8;
+    font-size: 1.35rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    overflow: hidden;
+    padding: 0;
+}
+.user-badge:hover { background: #f0d0d0; transform: scale(1.08); }
+
+
+/* Preload dark mode to prevent flash */
+html.dark-mode-preload body,
+html.dark-mode-preload { background: #0a0a0a !important; }
+
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <!-- ✏️ LOGO IMAGE: Replace "ccse_logo.jpg" with your logo file name -->
+    <div class="logo"><a href="index.html"><img class="logo-img" src="ccse_logo.jpg" alt="CCSE"> CCSE Booking</a></div>
+
+        <ul class="nav-links">
+        <li><a href="facilities.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="9" x2="21" y2="9"/><line x1="15" y1="15" x2="21" y2="15"/></svg>Facilities</a></li>
+        <li><a href="mybookings.html"><svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="16" y2="18"/></svg>My Bookings</a></li>
+        <li><a href="help.html"><svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>Help</a></li>
+    </ul>
+
+    <div class="nav-right">
+        <a class="user-badge" href="profile.html" id="user-badge" title="My Profile"><svg class="nav-icon" style="width:22px;height:22px;stroke-width:1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+        <button class="btn-primary" onclick="location.href='booking.html'">Start Booking</button>
+        <button class="btn-logout" onclick="doLogout()">Log Out</button>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-image"></div>
+
+    <div class="hero-text">
+        <h1 style="font-size:1.9rem; margin-bottom:6px;">Book CCSE Facilities Online</h1>
+        <p>Reserve labs, library sessions, or clinic visits quickly and easily.</p>
+        <button class="btn-primary" onclick="location.href='booking.html'">Start Booking</button>
+    </div>
+</section>
+
+<!-- BOOKING / CHECK AVAILABILITY -->
+<div class="booking-box">
+    <select id="av-facility">
+        <option value="">Choose Facility</option>
+        <option value="Clinic">Clinic</option>
+        <option value="Library">Library</option>
+        <option value="Computer Lab">Computer Lab</option>
+    </select>
+
+    <input type="date" id="av-date">
+    <select id="av-time">
+        <option value="">Choose Time Slot</option>
+        <option value="8">8:00 AM – 9:00 AM</option>
+        <option value="9">9:00 AM – 10:00 AM</option>
+        <option value="10">10:00 AM – 11:00 AM</option>
+        <option value="11">11:00 AM – 12:00 PM</option>
+        <option value="13">1:00 PM – 2:00 PM</option>
+        <option value="14">2:00 PM – 3:00 PM</option>
+        <option value="15">3:00 PM – 4:00 PM</option>
+        <option value="16">4:00 PM – 5:00 PM</option>
+    </select>
+
+    <button class="btn-primary" onclick="checkAvailability()">Check Availability</button>
+</div>
+
+<!-- AVAILABILITY RESULT -->
+<div id="av-result" style="display:none; text-align:center; margin: -8px auto 20px; max-width: 80%;">
+    <div id="av-badge" style="display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:30px; font-weight:bold; font-size:0.95rem;"></div>
+</div>
+
+<!-- FACILITIES -->
+<section class="facilities">
+    <h2>Available Facilities</h2>
+    <p>Select a facility and book your slot.</p>
+
+    <div class="facility-grid">
+        <div class="card">
+            <h3>Clinic</h3>
+            <p>Health checkups and consultations.</p>
+        </div>
+
+        <div class="card">
+            <h3>Library</h3>
+            <p>Quiet study and research area.</p>
+        </div>
+
+        <div class="card">
+            <h3>Computer Lab</h3>
+            <p>Access computers and software.</p>
+        </div>
+    </div>
+</section>
+
+<script>
+// =============================================
+// AUTH GUARD — redirect if not logged in
+// =============================================
+(function() {
+    const session = JSON.parse(localStorage.getItem('ccse_session') || 'null');
+    if (!session) {
+        location.href = 'login.html';
+        return;
+    }
+    // Update user badge tooltip
+    const badge = document.getElementById('user-badge');
+    if (badge) badge.title = session.name || 'My Profile';
+})();
+
+function doLogout() {
+    localStorage.removeItem('ccse_session');
+    location.href = 'login.html';
+}
+
+// ── CHECK AVAILABILITY ──
+function checkAvailability() {
+    const facility = document.getElementById('av-facility').value;
+    const date     = document.getElementById('av-date').value;
+    const time     = document.getElementById('av-time').value;
+    const result   = document.getElementById('av-result');
+    const badge    = document.getElementById('av-badge');
+
+    if (!facility || !date || !time) {
+        badge.style.background = '#fff3cd';
+        badge.style.color = '#856404';
+        badge.style.border = '1.5px solid #ffc107';
+        badge.innerHTML = '⚠️ Please fill in all 3 fields first.';
+        result.style.display = 'block';
+        return;
+    }
+
+    // Slot value is the start hour in 24hr (e.g. "8", "13")
+    const h = parseInt(time, 10);
+
+    const bookings = JSON.parse(localStorage.getItem('ccse_bookings') || '[]');
+
+    const MAX_PER_SLOT = 3;
+    function normFac(f) {
+        return (f || '').toLowerCase().trim().replace('computer lab','lab').replace('comp lab','lab');
+    }
+    const count = bookings.filter(b => {
+        if (b.status === 'cancelled') return false;
+        if (b.date !== date) return false;
+        if (!b.facility) return false;
+        if (normFac(b.facility) !== normFac(facility)) return false;
+        if (!b.time) return false;
+        const slotMatch = b.time.match(/^(\d+)(?::(\d+))?\s*(AM|PM)/i);
+        if (!slotMatch) return false;
+        let bh = parseInt(slotMatch[1], 10);
+        const bAmpm = slotMatch[3].toUpperCase();
+        if (bAmpm === 'PM' && bh !== 12) bh += 12;
+        if (bAmpm === 'AM' && bh === 12) bh = 0;
+        return bh === h;
+    }).length;
+
+    if (count >= MAX_PER_SLOT) {
+        badge.style.background = '#fdecea';
+        badge.style.color = '#c62828';
+        badge.style.border = '1.5px solid #e57373';
+        badge.innerHTML = '🔴 <strong>Fully Booked</strong> — This slot has no more availability.';
+    } else if (count > 0) {
+        badge.style.background = '#fffbea';
+        badge.style.color = '#b45309';
+        badge.style.border = '1.5px solid #fbbf24';
+        badge.innerHTML = '🟡 <strong>' + (MAX_PER_SLOT - count) + ' spot' + (MAX_PER_SLOT - count > 1 ? 's' : '') + ' left</strong> — Partially booked.';
+    } else {
+        badge.style.background = '#e8f5e9';
+        badge.style.color = '#2e7d32';
+        badge.style.border = '1.5px solid #66bb6a';
+        badge.innerHTML = '🟢 <strong>Vacant</strong> — This slot is fully available!';
+    }
+    result.style.display = 'block';
+}
+</script>
+
+<script>
+// ── Apply saved dark mode theme on every page load ──
+(function() {
+    if (localStorage.getItem('ccse_theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+})();
+</script>
+</body>
+</html>     
+
+
+        
