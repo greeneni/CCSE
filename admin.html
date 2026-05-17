@@ -350,23 +350,7 @@ body.dark-mode #toggle-track { background: #cc0000 !important; }
 body.dark-mode #toggle-thumb { transform: translateX(20px) !important; }
 body.dark-mode #dark-toggle-label { color: #ff4444 !important; }
 
-/* ── Admin page background image (light mode) ── */
-.main {
-    background-image: url("ccse_logo.jpg");
-    background-size: 280px;
-    background-repeat: no-repeat;
-    background-position: bottom right;
-    background-attachment: fixed;
-    opacity: 1;
-}
-body.dark-mode .main {
-    background-image: url("ccse_logo.jpg");
-    background-size: 280px;
-    background-repeat: no-repeat;
-    background-position: bottom right;
-    background-attachment: fixed;
-    filter: none;
-}
+/* ── Logo watermark removed from background — now shown below tables ── */
 
 /* ── GLOBAL DARK MODE — matches site-wide black/red theme ── */
 body.dark-mode {
@@ -473,6 +457,34 @@ body.dark-mode .btn-confirm { background: #cc0000 !important; }
 html.dark-mode-preload body,
 html.dark-mode-preload { background: #1a1a2e !important; }
 
+
+/* ── Logo footer below tables ── */
+.admin-logo-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 32px;
+    gap: 10px;
+    opacity: 0.18;
+    pointer-events: none;
+    user-select: none;
+}
+.admin-logo-footer img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+.admin-logo-footer span {
+    font-size: 0.82rem;
+    color: var(--primary);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+body.dark-mode .admin-logo-footer span { color: #ff4444; }
 </style>
 </head>
 <body>
@@ -634,6 +646,12 @@ html.dark-mode-preload { background: #1a1a2e !important; }
                     🗑 Clear All Users
                 </button>
             </div>
+        </div>
+
+        <!-- LOGO FOOTER -->
+        <div class="admin-logo-footer">
+            <img src="ccse_logo.jpg" alt="CCSE Logo">
+            <span>CCSE Booking System</span>
         </div>
 
     </div>
